@@ -1,0 +1,28 @@
+Vaultara Inheritance - Deployment Info
+======================================
+
+Network: Sepolia Testnet
+Contract Address: 0xC11949532F5C46d567D254dCcFAd4BDC87f1306A
+Etherscan: https://sepolia.etherscan.io/address/0xC11949532F5C46d567D254dCcFAd4BDC87f1306A
+
+Deployment Date: [Current Date]
+Deployer: [Your Wallet Address]
+
+======================================
+
+📤 Submitted source code for verification on Blockscout:
+
+  contracts/VaultaraInheritance.sol:VaultaraInheritance
+  Address: 0xC11949532F5C46d567D254dCcFAd4BDC87f1306A
+
+⏳ Waiting for verification result...
+
+Contract verified successfully on Etherscan!
+
+  contracts/VaultaraInheritance.sol:VaultaraInheritance
+  Explorer: https://sepolia.etherscan.io/address/0xC11949532F5C46d567D254dCcFAd4BDC87f1306A#code
+
+✅ Contract verified successfully on Blockscout!
+
+  contracts/VaultaraInheritance.sol:VaultaraInheritance
+  Explorer: https://eth-sepolia.blockscout.com/address/0xC11949532F5C46d567D254dCcFAd4BDC87f1306A#code
