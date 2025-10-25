@@ -176,6 +176,32 @@ export const useVaultaraContract = (
         }
     };
 
+    // Update beneficiary
+    const updateBeneficiary = async (address: string, newSharePercentage: number) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const contract = getContract();
+            if (!contract) throw new Error('Contract not available');
+
+            // Share percentage is stored as basis points (e.g., 50% = 5000)
+            const shareInBasisPoints = newSharePercentage * 100;
+
+            const tx = await contract.updateBeneficiary(address, shareInBasisPoints);
+            await tx.wait();
+            await fetchBeneficiaries();
+
+            setLoading(false);
+            return { success: true, txHash: tx.hash };
+        } catch (err: any) {
+            console.error('Error updating beneficiary:', err);
+            setError(err.message);
+            setLoading(false);
+            return { success: false, error: err.message };
+        }
+    };
+
     // Remove beneficiary
     const removeBeneficiary = async (address: string) => {
         try {
@@ -248,6 +274,54 @@ export const useVaultaraContract = (
         }
     };
 
+
+    // Deactivate vault
+    const deactivateVault = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const contract = getContract();
+            if (!contract) throw new Error('Contract not available');
+
+            const tx = await contract.deactivateVault();
+            await tx.wait();
+            await fetchVaultStatus();
+
+            setLoading(false);
+            return { success: true, txHash: tx.hash };
+        } catch (err: any) {
+            console.error('Error deactivating vault:', err);
+            setError(err.message);
+            setLoading(false);
+            return { success: false, error: err.message };
+        }
+    };
+
+    // Withdraw funds (when vault is deactivated)
+    const withdrawFunds = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const contract = getContract();
+            if (!contract) throw new Error('Contract not available');
+
+            const tx = await contract.withdrawFunds();
+            await tx.wait();
+            await fetchVaultStatus();
+
+            setLoading(false);
+            return { success: true, txHash: tx.hash };
+        } catch (err: any) {
+            console.error('Error withdrawing funds:', err);
+            setError(err.message);
+            setLoading(false);
+            return { success: false, error: err.message };
+        }
+    };
+
+
     // Auto-refresh vault status every 10 seconds
     useEffect(() => {
         if (provider) {
@@ -271,9 +345,12 @@ export const useVaultaraContract = (
         initializeVault,
         sendHeartbeat,
         addBeneficiary,
+        updateBeneficiary,
         removeBeneficiary,
         triggerInheritance,
         fundVault,
+        deactivateVault,
+        withdrawFunds,
         refreshData: () => {
             fetchVaultStatus();
             fetchBeneficiaries();

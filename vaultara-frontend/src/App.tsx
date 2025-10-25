@@ -1,5 +1,5 @@
 import { useWallet } from './hooks/useWallet';
-import { Wallet, Shield, Clock, Users } from 'lucide-react';
+import { Wallet, Shield, Clock, Users, LogOut } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { useState, useEffect } from 'react';
 
@@ -12,9 +12,10 @@ function App() {
     error,
     isCorrectNetwork,
     connectWallet,
+    disconnect,  
     switchToSepolia
   } = useWallet();
-  
+
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -51,31 +52,39 @@ function App() {
               <h1 className="text-2xl font-bold text-white">Vaultara</h1>
             </div>
 
-            {/* Wallet Connection Button */}
             {!account ? (
               <button
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-purple-500/50"
               >
                 <Wallet className="w-5 h-5" />
                 <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
               </button>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 {!isCorrectNetwork && (
                   <button
                     onClick={switchToSepolia}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-lg hover:shadow-yellow-500/50"
                   >
                     Switch to Sepolia
                   </button>
                 )}
-                <div className="bg-slate-800 border border-purple-500/30 px-4 py-2 rounded-lg">
+                <div className="flex items-center space-x-2 bg-slate-800 border border-purple-500/30 px-4 py-2 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <p className="text-sm text-purple-300 font-mono">
                     {account.slice(0, 6)}...{account.slice(-4)}
                   </p>
                 </div>
+                <button
+                  onClick={disconnect}
+                  className="flex items-center space-x-2 bg-slate-800 hover:bg-red-600 border border-purple-500/30 hover:border-red-500 text-gray-300 hover:text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-red-500/50"
+                  title="Disconnect wallet"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Disconnect</span>
+                </button>
               </div>
             )}
           </div>
