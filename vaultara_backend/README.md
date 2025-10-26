@@ -1,57 +1,181 @@
-# Sample Hardhat 3 Beta Project (`mocha` and `ethers`)
+# Vaultara - Smart Contract Backend
 
-This project showcases a Hardhat 3 Beta project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+##  Overview
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+The Vaultara smart contract is a self-sovereign crypto inheritance solution built on Ethereum. It ensures digital assets are never lost by implementing an automated heartbeat mechanism that transfers funds to designated beneficiaries if the owner becomes inactive.
 
-## Project Overview
+##  Architecture
 
-This example project includes:
+### Core Contract: `VaultaraInheritance.sol`
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+**Key Features:**
+- Heartbeat mechanism for owner activity verification
+- Encrypted beneficiary management
+- Automatic fund distribution on inactivity
+- Comprehensive security measures
 
-## Usage
+### Security Features
 
-### Running Tests
+- **ReentrancyGuard**: Protection against reentrancy attacks
+- **Ownable**: Access control for sensitive operations
+- **Custom Errors**: Gas-efficient error handling
+- **Input Validation**: All parameters validated before execution
+- **Event Logging**: Complete on-chain audit trail
 
-To run all the tests in the project, execute the following command:
+##  Tech Stack
 
-```shell
-npx hardhat test
+- **Solidity**: ^0.8.20
+- **Hardhat**: ^3.0.7
+- **OpenZeppelin Contracts**: ^5.4.0
+- **TypeScript**: ^5.8.0
+- **Ethers.js**: ^6.15.0
+
+##  Getting Started
+
+### Prerequisites
+
+```bash
+Node.js >= 18.0.0
+npm >= 9.0.0
 ```
 
-You can also selectively run the Solidity or `mocha` tests:
+### Installation
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
+```bash
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
 ```
 
-### Make a deployment to Sepolia
+### Environment Variables
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+Create a `.env` file with:
 
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
+```env
+SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY
+SEPOLIA_PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
 ```
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+##  Testing
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
+```bash
+# Run all tests
+npm test
 
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
+# Run tests with coverage
+npx hardhat coverage
 
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+# Run specific test file
+npx hardhat test test/VaultaraInheritance.test.ts
 ```
 
-After setting the variable, you can run the deployment with the Sepolia network:
+### Test Coverage
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
+- 48 comprehensive tests
+- 100% function coverage
+- Edge cases and security scenarios tested
+
+## Smart Contract Functions
+
+### Owner Functions
+
+| Function                                   | Description                              | Access     |
+| ------------------------------------------ | ---------------------------------------- | ---------- |
+| `initializeVault(uint256 interval)`        | Initialize vault with heartbeat interval | Owner only |
+| `sendHeartbeat()`                          | Send heartbeat to prove activity         | Owner only |
+| `addBeneficiary(address, uint256, string)` | Add beneficiary with encrypted data      | Owner only |
+| `updateBeneficiary(address, uint256)`      | Update beneficiary share                 | Owner only |
+| `removeBeneficiary(address)`               | Remove a beneficiary                     | Owner only |
+| `updateHeartbeatInterval(uint256)`         | Change heartbeat interval                | Owner only |
+| `deactivateVault()`                        | Deactivate vault                         | Owner only |
+| `withdrawFunds()`                          | Withdraw funds (when inactive)           | Owner only |
+
+### Public Functions
+
+| Function                   | Description                | Access                |
+| -------------------------- | -------------------------- | --------------------- |
+| `triggerInheritance()`     | Trigger fund distribution  | Anyone (when expired) |
+| `isHeartbeatExpired()`     | Check if heartbeat expired | Public view           |
+| `getActiveBeneficiaries()` | Get list of beneficiaries  | Public view           |
+| `getTimeUntilExpiry()`     | Time until next heartbeat  | Public view           |
+
+##  Contract Flow
+
 ```
+1. Owner deploys contract
+2. Owner initializes vault with heartbeat interval (e.g., 7 days)
+3. Owner adds beneficiaries with share percentages (must total 100%)
+4. Owner funds the contract with ETH
+5. Owner sends periodic heartbeats to stay active
+6. If heartbeat expires:
+   - Anyone can call triggerInheritance()
+   - Contract automatically distributes funds to beneficiaries
+   - Vault becomes inactive
+```
+
+##  Deployment
+
+### Deploy to Sepolia Testnet
+
+```bash
+npx hardhat ignition deploy ignition/modules/VaultaraInheritance.ts --network sepolia
+```
+
+### Verify on Blockscout
+
+```bash
+npx hardhat verify --network sepolia DEPLOYED_CONTRACT_ADDRESS
+```
+
+### Current Deployment
+
+- **Network**: Sepolia Testnet
+- **Contract Address**: `0xC11949532F5C46d567D254dCcFAd4BDC87f1306A`
+- **Blockscout**: [View Contract](https://eth-sepolia.blockscout.com/address/0xC11949532F5C46d567D254dCcFAd4BDC87f1306A)
+
+##  Gas Optimization
+
+- Custom errors instead of revert strings
+- Efficient storage patterns
+- Minimal on-chain computation
+- Optimized loops and iterations
+
+##  Security Considerations
+
+### Implemented
+
+- Reentrancy protection
+- Integer overflow/underflow protection (Solidity 0.8+)
+- Access control modifiers
+- Input validation
+- Share percentage validation (must equal 100%)
+- Heartbeat interval bounds (1-365 days)
+
+### Auditing
+
+This is a prototype/MVP. For production:
+- Professional security audit required
+- Formal verification recommended
+- Bug bounty program suggested
+
+## License
+
+MIT License 
+
+## Contributing
+
+This is a hackathon project. For production improvements:
+1. Fork the repository
+2. Create feature branch
+3. Submit pull request with tests
+
+## Contact
+
+For questions or issues, please open an issue on GitHub.
+
+---
+
+**Built with ❤️ for ETHOnline 2025 by [Ravi Shankar kumar](https://x.com/RaviShanka5139)**
