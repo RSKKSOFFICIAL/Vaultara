@@ -55,47 +55,125 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
   }
 
   const handleInitializeVault = async () => {
-    const result = await initializeVault(Number(heartbeatDays))
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Vault initialized successfully!" })
-      setShowInitModal(false)
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to initialize vault" })
+    try {
+      const result = await initializeVault(Number(heartbeatDays))
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Vault initialized successfully!" })
+        setShowInitModal(false)
+      } else {
+        let errorMsg = "Failed to initialize vault"
+
+        if (result.error?.includes("VaultAlreadyActive")) {
+          errorMsg = "Vault is already initialized"
+        } else if (result.error?.includes("InvalidHeartbeatInterval")) {
+          errorMsg = "Invalid heartbeat interval. Must be between 1-365 days"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Initialize error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
   const handleSendHeartbeat = async () => {
-    const result = await sendHeartbeat()
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Heartbeat sent successfully!" })
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to send heartbeat" })
+    try {
+      const result = await sendHeartbeat()
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Heartbeat sent successfully!" })
+      } else {
+        let errorMsg = "Failed to send heartbeat"
+
+        if (result.error?.includes("VaultNotActive")) {
+          errorMsg = "Vault is not active"
+        } else if (result.error?.includes("OwnableUnauthorizedAccount")) {
+          errorMsg = "Only the vault owner can send heartbeat"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Heartbeat error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
   const handleUpdateBeneficiary = async () => {
-    const result = await updateBeneficiary(selectedBeneficiary, Number(newSharePercentage))
+    try {
+      const result = await updateBeneficiary(selectedBeneficiary, Number(newSharePercentage))
 
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Beneficiary updated successfully!" })
-      setShowUpdateBeneficiaryModal(false)
-      setSelectedBeneficiary("")
-      setNewSharePercentage("")
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to update beneficiary" })
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Beneficiary updated successfully!" })
+        setShowUpdateBeneficiaryModal(false)
+        setSelectedBeneficiary("")
+        setNewSharePercentage("")
+      } else {
+        let errorMsg = "Failed to update beneficiary"
+
+        if (result.error?.includes("BeneficiaryNotFound")) {
+          errorMsg = "Beneficiary not found"
+        } else if (result.error?.includes("InvalidSharePercentage")) {
+          errorMsg = "Invalid share percentage. Must be between 0.1-100%"
+        } else if (result.error?.includes("TotalShareMustBe100Percent")) {
+          errorMsg = "Total share allocation must equal 100%"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Update beneficiary error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
   const handleRemoveBeneficiary = async (address: string) => {
-    if (!window.confirm(`Are you sure you want to remove beneficiary ${address.slice(0, 6)}...${address.slice(-4)}?`)) {
-      return
-    }
+    try {
+      if (!window.confirm(`Are you sure you want to remove beneficiary ${address.slice(0, 6)}...${address.slice(-4)}?`)) {
+        return
+      }
 
-    const result = await removeBeneficiary(address)
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Beneficiary removed successfully!" })
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to remove beneficiary" })
+      const result = await removeBeneficiary(address)
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Beneficiary removed successfully!" })
+      } else {
+        let errorMsg = "Failed to remove beneficiary"
+
+        if (result.error?.includes("BeneficiaryNotFound")) {
+          errorMsg = "Beneficiary not found"
+        } else if (result.error?.includes("VaultNotActive")) {
+          errorMsg = "Vault is not active"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Remove beneficiary error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
@@ -139,59 +217,141 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
   }
 
   const handleWithdrawFunds = async () => {
-    if (!window.confirm("Withdraw all funds from the vault?")) {
-      return
-    }
+    try {
+      if (!window.confirm("Withdraw all funds from the vault?")) {
+        return
+      }
 
-    const result = await withdrawFunds()
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Funds withdrawn successfully!" })
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to withdraw funds" })
+      const result = await withdrawFunds()
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Funds withdrawn successfully!" })
+      } else {
+        let errorMsg = "Failed to withdraw funds"
+
+        if (result.error?.includes("VaultNotActive")) {
+          errorMsg = "Vault must be inactive to withdraw funds"
+        } else if (result.error?.includes("NoFundsToTransfer")) {
+          errorMsg = "No funds available to withdraw"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Withdraw error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
   const handleTriggerInheritance = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to trigger inheritance? This will distribute all funds to beneficiaries and cannot be reversed!",
-      )
-    ) {
-      return
-    }
+    try {
+      if (
+        !window.confirm(
+          "Are you sure you want to trigger inheritance? This will distribute all funds to beneficiaries and cannot be reversed!",
+        )
+      ) {
+        return
+      }
 
-    const result = await triggerInheritance()
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Inheritance triggered! Funds distributed to beneficiaries." })
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to trigger inheritance" })
+      const result = await triggerInheritance()
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Inheritance triggered! Funds distributed to beneficiaries." })
+      } else {
+        let errorMsg = "Failed to trigger inheritance"
+
+        if (result.error?.includes("HeartbeatStillValid")) {
+          errorMsg = "Cannot trigger: Heartbeat has not expired yet"
+        } else if (result.error?.includes("NoBeneficiaries")) {
+          errorMsg = "No beneficiaries added to receive funds"
+        } else if (result.error?.includes("TotalShareMustBe100Percent")) {
+          errorMsg = "Total beneficiary allocation must equal 100%"
+        } else if (result.error?.includes("InheritanceAlreadyTriggered")) {
+          errorMsg = "Inheritance has already been triggered"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Trigger inheritance error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
   const { simpleEncrypt } = useLitProtocol(account)
   const handleAddBeneficiary = async () => {
-    const encryptedMetadata = await simpleEncrypt(beneficiaryAddress, account)
+    try {
+      const encryptedMetadata = await simpleEncrypt(beneficiaryAddress, account)
 
-    const result = await addBeneficiary(beneficiaryAddress, Number(beneficiaryShare), encryptedMetadata)
+      const result = await addBeneficiary(beneficiaryAddress, Number(beneficiaryShare), encryptedMetadata)
 
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Beneficiary added with Lit Protocol encryption!" })
-      setShowAddBeneficiaryModal(false)
-      setBeneficiaryAddress("")
-      setBeneficiaryShare("")
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to add beneficiary" })
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Beneficiary added with Lit Protocol encryption!" })
+        setShowAddBeneficiaryModal(false)
+        setBeneficiaryAddress("")
+        setBeneficiaryShare("")
+      } else {
+        let errorMsg = "Failed to add beneficiary"
+
+        if (result.error?.includes("InvalidBeneficiary")) {
+          errorMsg = "Invalid beneficiary address"
+        } else if (result.error?.includes("BeneficiaryAlreadyExists")) {
+          errorMsg = "This beneficiary already exists"
+        } else if (result.error?.includes("InvalidSharePercentage")) {
+          errorMsg = "Invalid share percentage. Must be between 0.1-100%"
+        } else if (result.error?.includes("TotalShareMustBe100Percent")) {
+          errorMsg = "Total share allocation cannot exceed 100%"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Add beneficiary error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
   const handleFundVault = async () => {
-    const result = await fundVault(fundAmount)
-    if (result.success) {
-      setTxStatus({ type: "success", message: "Vault funded successfully!" })
-      setShowFundModal(false)
-      setFundAmount("")
-    } else {
-      setTxStatus({ type: "error", message: result.error || "Failed to fund vault" })
+    try {
+      const result = await fundVault(fundAmount)
+      if (result.success) {
+        setTxStatus({ type: "success", message: "Vault funded successfully!" })
+        setShowFundModal(false)
+        setFundAmount("")
+      } else {
+        let errorMsg = "Failed to fund vault"
+
+        if (result.error?.includes("insufficient funds")) {
+          errorMsg = "Insufficient balance to fund vault"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
+        }
+
+        setTxStatus({ type: "error", message: errorMsg })
+      }
+    } catch (err: any) {
+      console.error("Fund vault error:", err)
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
+      }
+      setTxStatus({ type: "error", message: errorMsg })
     }
   }
 
@@ -208,11 +368,10 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
     <div className="space-y-6">
       {txStatus && (
         <div
-          className={`flex items-center justify-between p-4 rounded-lg animate-fadeIn backdrop-blur border ${
-            txStatus.type === "success"
-              ? "bg-green-500/10 border-green-500/50 text-green-200"
-              : "bg-red-500/10 border-red-500/50 text-red-200"
-          }`}
+          className={`flex items-center justify-between p-4 rounded-lg animate-fadeIn backdrop-blur border ${txStatus.type === "success"
+            ? "bg-green-500/10 border-green-500/50 text-green-200"
+            : "bg-red-500/10 border-red-500/50 text-red-200"
+            }`}
         >
           <div className="flex items-center space-x-2">
             {txStatus.type === "success" ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
@@ -273,9 +432,8 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
                   <Heart className="w-5 h-5 text-orange-600" />
                 </div>
                 <span
-                  className={`text-xs px-2 py-1 rounded font-semibold ${
-                    vaultStatus.isExpired ? "bg-red-500/20 text-red-300" : "bg-green-500/20 text-green-300"
-                  }`}
+                  className={`text-xs px-2 py-1 rounded font-semibold ${vaultStatus.isExpired ? "bg-red-500/20 text-red-300" : "bg-green-500/20 text-green-300"
+                    }`}
                 >
                   {vaultStatus.isExpired ? "EXPIRED" : "ACTIVE"}
                 </span>
