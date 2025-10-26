@@ -8,23 +8,59 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+  background: #000000;
   min-height: 100vh;
 }
 
-/* Smooth animations */
+/* Modern font families */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap");
 
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
+
+.font-inter {
+  font-family: "Inter", sans-serif;
+}
+
+/* Typewriter animation for hero quote */
+@keyframes typewriter {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    border-right-color: #ea580c;
+  }
+  50%,
+  100% {
+    border-right-color: transparent;
+  }
+}
+
+.typewriter {
+  overflow: hidden;
+  border-right: 3px solid #ea580c;
+  white-space: nowrap;
+  animation: typewriter 4s steps(40, end) 0.5s 1 normal both, blink 0.75s step-end infinite;
+  display: inline-block;
+}
+
+/* Enhanced animations for professional feel */
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(-10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -36,12 +72,10 @@ body {
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 1;
   }
-
   50% {
     opacity: 0.5;
   }
@@ -51,18 +85,27 @@ body {
   from {
     transform: translateX(-100%);
   }
-
   to {
     transform: translateX(0);
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-out;
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-pulse-slow {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 3s ease-in-out infinite;
 }
 
 /* Glass morphism effect */
@@ -79,7 +122,6 @@ button {
 
 button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.5);
 }
 
 button:active:not(:disabled) {
@@ -93,8 +135,7 @@ button:active:not(:disabled) {
 
 .card-hover:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.3);
-  border-color: rgba(168, 85, 247, 0.5);
+  border-color: rgba(234, 88, 12, 0.5);
 }
 
 /* Loading spinner */
@@ -108,28 +149,37 @@ button:active:not(:disabled) {
   animation: spin 1s linear infinite;
 }
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: #1f2937;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #8b5cf6;
+  background: linear-gradient(180deg, #ea580c 0%, #f97316 100%);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a78bfa;
+  background: linear-gradient(180deg, #dc2626 0%, #ea580c 100%);
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  .typewriter {
+    font-size: 1.875rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .typewriter {
+    font-size: 2.25rem;
+  }
 }

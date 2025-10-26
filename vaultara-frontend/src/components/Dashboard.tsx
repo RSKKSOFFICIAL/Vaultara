@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import { Clock, Heart, Users, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
-import { useVaultaraContract } from '../hooks/useVaultaraContract';
-import { useLitProtocol } from '../hooks/useLitProtocol';
-import { TransactionHistory } from './TransactionHistory';
+"use client"
+
+import { useState, useEffect } from "react"
+import { ethers } from "ethers"
+import { Clock, Heart, Users, DollarSign, AlertCircle, CheckCircle, Zap, Lock } from "lucide-react"
+import { useVaultaraContract } from "../hooks/useVaultaraContract"
+import { useLitProtocol } from "../hooks/useLitProtocol"
+import { TransactionHistory } from "./TransactionHistory"
 
 interface DashboardProps {
-  provider: ethers.BrowserProvider;
-  signer: ethers.JsonRpcSigner;
-  account: string;
+  provider: ethers.BrowserProvider
+  signer: ethers.JsonRpcSigner
+  account: string
 }
 
 export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
@@ -26,207 +28,204 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
     fundVault,
     deactivateVault,
     withdrawFunds,
-  } = useVaultaraContract(provider, signer);
+  } = useVaultaraContract(provider, signer)
 
-  const [showInitModal, setShowInitModal] = useState(false);
-  const [showAddBeneficiaryModal, setShowAddBeneficiaryModal] = useState(false);
-  const [showFundModal, setShowFundModal] = useState(false);
-  const [heartbeatDays, setHeartbeatDays] = useState('7');
-  const [beneficiaryAddress, setBeneficiaryAddress] = useState('');
-  const [beneficiaryShare, setBeneficiaryShare] = useState('');
-  const [fundAmount, setFundAmount] = useState('');
-  const [txStatus, setTxStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-  const [showUpdateBeneficiaryModal, setShowUpdateBeneficiaryModal] = useState(false);
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState<string>('');
-  const [newSharePercentage, setNewSharePercentage] = useState('');
-  const isOwner = vaultStatus?.owner.toLowerCase() === account.toLowerCase();
+  const [showInitModal, setShowInitModal] = useState(false)
+  const [showAddBeneficiaryModal, setShowAddBeneficiaryModal] = useState(false)
+  const [showFundModal, setShowFundModal] = useState(false)
+  const [heartbeatDays, setHeartbeatDays] = useState("7")
+  const [beneficiaryAddress, setBeneficiaryAddress] = useState("")
+  const [beneficiaryShare, setBeneficiaryShare] = useState("")
+  const [fundAmount, setFundAmount] = useState("")
+  const [txStatus, setTxStatus] = useState<{ type: "success" | "error"; message: string } | null>(null)
+  const [showUpdateBeneficiaryModal, setShowUpdateBeneficiaryModal] = useState(false)
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState<string>("")
+  const [newSharePercentage, setNewSharePercentage] = useState("")
+  const isOwner = vaultStatus?.owner.toLowerCase() === account.toLowerCase()
 
-  // Format time remaining
   const formatTimeRemaining = (seconds: bigint) => {
-    const num = Number(seconds);
-    const days = Math.floor(num / 86400);
-    const hours = Math.floor((num % 86400) / 3600);
-    const minutes = Math.floor((num % 3600) / 60);
+    const num = Number(seconds)
+    const days = Math.floor(num / 86400)
+    const hours = Math.floor((num % 86400) / 3600)
+    const minutes = Math.floor((num % 3600) / 60)
 
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
-  };
+    if (days > 0) return `${days}d ${hours}h`
+    if (hours > 0) return `${hours}h ${minutes}m`
+    return `${minutes}m`
+  }
 
   const handleInitializeVault = async () => {
-    const result = await initializeVault(Number(heartbeatDays));
+    const result = await initializeVault(Number(heartbeatDays))
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Vault initialized successfully!' });
-      setShowInitModal(false);
+      setTxStatus({ type: "success", message: "Vault initialized successfully!" })
+      setShowInitModal(false)
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to initialize vault' });
+      setTxStatus({ type: "error", message: result.error || "Failed to initialize vault" })
     }
-  };
+  }
 
   const handleSendHeartbeat = async () => {
-    const result = await sendHeartbeat();
+    const result = await sendHeartbeat()
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Heartbeat sent successfully!' });
+      setTxStatus({ type: "success", message: "Heartbeat sent successfully!" })
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to send heartbeat' });
+      setTxStatus({ type: "error", message: result.error || "Failed to send heartbeat" })
     }
-  };
+  }
 
   const handleUpdateBeneficiary = async () => {
-    const result = await updateBeneficiary(selectedBeneficiary, Number(newSharePercentage));
+    const result = await updateBeneficiary(selectedBeneficiary, Number(newSharePercentage))
 
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Beneficiary updated successfully!' });
-      setShowUpdateBeneficiaryModal(false);
-      setSelectedBeneficiary('');
-      setNewSharePercentage('');
+      setTxStatus({ type: "success", message: "Beneficiary updated successfully!" })
+      setShowUpdateBeneficiaryModal(false)
+      setSelectedBeneficiary("")
+      setNewSharePercentage("")
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to update beneficiary' });
+      setTxStatus({ type: "error", message: result.error || "Failed to update beneficiary" })
     }
-  };
+  }
 
   const handleRemoveBeneficiary = async (address: string) => {
     if (!window.confirm(`Are you sure you want to remove beneficiary ${address.slice(0, 6)}...${address.slice(-4)}?`)) {
-      return;
+      return
     }
 
-    const result = await removeBeneficiary(address);
+    const result = await removeBeneficiary(address)
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Beneficiary removed successfully!' });
+      setTxStatus({ type: "success", message: "Beneficiary removed successfully!" })
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to remove beneficiary' });
+      setTxStatus({ type: "error", message: result.error || "Failed to remove beneficiary" })
     }
-  };
+  }
 
   const handleDeactivateVault = async () => {
     try {
-      if (!window.confirm('Are you sure you want to deactivate the vault? You can withdraw funds after deactivation.')) {
-        return;
+      if (
+        !window.confirm("Are you sure you want to deactivate the vault? You can withdraw funds after deactivation.")
+      ) {
+        return
       }
 
-      const result = await deactivateVault();
+      const result = await deactivateVault()
 
       if (result.success) {
-        setTxStatus({ type: 'success', message: 'Vault deactivated successfully!' });
+        setTxStatus({ type: "success", message: "Vault deactivated successfully!" })
       } else {
-        // Parse error message to be user-friendly
-        let errorMsg = 'Failed to deactivate vault';
+        let errorMsg = "Failed to deactivate vault"
 
-        if (result.error?.includes('InheritanceAlreadyTriggered')) {
-          errorMsg = 'Cannot deactivate: Inheritance has already been triggered';
-        } else if (result.error?.includes('OwnableUnauthorizedAccount')) {
-          errorMsg = 'Only the vault owner can deactivate';
-        } else if (result.error?.includes('VaultNotActive')) {
-          errorMsg = 'Vault is already inactive';
-        } else if (result.error?.includes('user rejected')) {
-          errorMsg = 'Transaction cancelled by user';
+        if (result.error?.includes("InheritanceAlreadyTriggered")) {
+          errorMsg = "Cannot deactivate: Inheritance has already been triggered"
+        } else if (result.error?.includes("OwnableUnauthorizedAccount")) {
+          errorMsg = "Only the vault owner can deactivate"
+        } else if (result.error?.includes("VaultNotActive")) {
+          errorMsg = "Vault is already inactive"
+        } else if (result.error?.includes("user rejected")) {
+          errorMsg = "Transaction cancelled by user"
         }
 
-        setTxStatus({ type: 'error', message: errorMsg });
+        setTxStatus({ type: "error", message: errorMsg })
       }
     } catch (err: any) {
-      console.error('Deactivate error:', err);
+      console.error("Deactivate error:", err)
 
-      let errorMsg = 'Transaction failed';
-      if (err.message?.includes('user rejected')) {
-        errorMsg = 'Transaction cancelled';
+      let errorMsg = "Transaction failed"
+      if (err.message?.includes("user rejected")) {
+        errorMsg = "Transaction cancelled"
       }
 
-      setTxStatus({ type: 'error', message: errorMsg });
+      setTxStatus({ type: "error", message: errorMsg })
     }
-  };
+  }
 
   const handleWithdrawFunds = async () => {
-    if (!window.confirm('Withdraw all funds from the vault?')) {
-      return;
+    if (!window.confirm("Withdraw all funds from the vault?")) {
+      return
     }
 
-    const result = await withdrawFunds();
+    const result = await withdrawFunds()
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Funds withdrawn successfully!' });
+      setTxStatus({ type: "success", message: "Funds withdrawn successfully!" })
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to withdraw funds' });
+      setTxStatus({ type: "error", message: result.error || "Failed to withdraw funds" })
     }
-  };
+  }
 
   const handleTriggerInheritance = async () => {
-    if (!window.confirm('Are you sure you want to trigger inheritance? This will distribute all funds to beneficiaries and cannot be reversed!')) {
-      return;
+    if (
+      !window.confirm(
+        "Are you sure you want to trigger inheritance? This will distribute all funds to beneficiaries and cannot be reversed!",
+      )
+    ) {
+      return
     }
 
-    const result = await triggerInheritance();
+    const result = await triggerInheritance()
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Inheritance triggered! Funds distributed to beneficiaries.' });
+      setTxStatus({ type: "success", message: "Inheritance triggered! Funds distributed to beneficiaries." })
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to trigger inheritance' });
+      setTxStatus({ type: "error", message: result.error || "Failed to trigger inheritance" })
     }
-  };
-  const { simpleEncrypt } = useLitProtocol(account);
+  }
+
+  const { simpleEncrypt } = useLitProtocol(account)
   const handleAddBeneficiary = async () => {
-    const encryptedMetadata = await simpleEncrypt(beneficiaryAddress, account);
+    const encryptedMetadata = await simpleEncrypt(beneficiaryAddress, account)
 
-    const result = await addBeneficiary(
-      beneficiaryAddress,
-      Number(beneficiaryShare),
-      encryptedMetadata
-    );
+    const result = await addBeneficiary(beneficiaryAddress, Number(beneficiaryShare), encryptedMetadata)
 
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Beneficiary added with Lit Protocol encryption!' });
-      setShowAddBeneficiaryModal(false);
-      setBeneficiaryAddress('');
-      setBeneficiaryShare('');
+      setTxStatus({ type: "success", message: "Beneficiary added with Lit Protocol encryption!" })
+      setShowAddBeneficiaryModal(false)
+      setBeneficiaryAddress("")
+      setBeneficiaryShare("")
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to add beneficiary' });
+      setTxStatus({ type: "error", message: result.error || "Failed to add beneficiary" })
     }
-  };
+  }
 
   const handleFundVault = async () => {
-    const result = await fundVault(fundAmount);
+    const result = await fundVault(fundAmount)
     if (result.success) {
-      setTxStatus({ type: 'success', message: 'Vault funded successfully!' });
-      setShowFundModal(false);
-      setFundAmount('');
+      setTxStatus({ type: "success", message: "Vault funded successfully!" })
+      setShowFundModal(false)
+      setFundAmount("")
     } else {
-      setTxStatus({ type: 'error', message: result.error || 'Failed to fund vault' });
+      setTxStatus({ type: "error", message: result.error || "Failed to fund vault" })
     }
-  };
+  }
 
-
-  // Clear status messages after 5 seconds
   useEffect(() => {
     if (txStatus) {
-      const timer = setTimeout(() => setTxStatus(null), 5000);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => setTxStatus(null), 5000)
+      return () => clearTimeout(timer)
     }
-  }, [txStatus]);
+  }, [txStatus])
 
-  // Calculate total allocated percentage
-  const totalAllocated = beneficiaries.reduce((sum, b) => sum + Number(b.sharePercentage) / 100, 0);
+  const totalAllocated = beneficiaries.reduce((sum, b) => sum + Number(b.sharePercentage) / 100, 0)
 
   return (
     <div className="space-y-6">
-      {/* Status Messages */}
       {txStatus && (
-        <div className={`flex items-center justify-between p-4 rounded-lg animate-fadeIn ${txStatus.type === 'success'
-          ? 'bg-green-500/20 border border-green-500 text-green-200'
-          : 'bg-red-500/20 border border-red-500 text-red-200'
-          }`}>
+        <div
+          className={`flex items-center justify-between p-4 rounded-lg animate-fadeIn backdrop-blur border ${
+            txStatus.type === "success"
+              ? "bg-green-500/10 border-green-500/50 text-green-200"
+              : "bg-red-500/10 border-red-500/50 text-red-200"
+          }`}
+        >
           <div className="flex items-center space-x-2">
-            {txStatus.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-            <span className="font-medium">{txStatus.message}</span>
+            {txStatus.type === "success" ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            <span className="font-medium text-sm">{txStatus.message}</span>
           </div>
-          <button
-            onClick={() => setTxStatus(null)}
-            className="text-gray-400 hover:text-white transition-all"
-          >
+          <button onClick={() => setTxStatus(null)} className="text-gray-400 hover:text-white transition-all">
             ×
           </button>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center justify-between bg-yellow-500/20 border border-yellow-500 text-yellow-200 px-4 py-3 rounded-lg">
+        <div className="flex items-center justify-between bg-yellow-500/10 border border-yellow-500/50 text-yellow-200 px-4 py-3 rounded-lg backdrop-blur">
           <div className="flex items-center space-x-2">
             <AlertCircle className="w-5 h-5" />
             <div>
@@ -245,16 +244,20 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
 
       {/* Vault Not Initialized */}
       {vaultStatus && !vaultStatus.isActive && (
-        <div className="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-xl p-8 text-center">
-          <Clock className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-white mb-2">Vault Not Initialized</h3>
-          <p className="text-gray-400 mb-6">Set up your heartbeat interval to start protecting your assets.</p>
+        <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-8 text-center">
+          <div className="p-4 bg-orange-600/20 rounded-full w-fit mx-auto mb-4">
+            <Clock className="w-8 h-8 text-orange-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2 font-poppins">Vault Not Initialized</h3>
+          <p className="text-gray-400 mb-6 font-inter">
+            Set up your heartbeat interval to start protecting your assets.
+          </p>
           <button
             onClick={() => setShowInitModal(true)}
             disabled={!isOwner}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed font-poppins"
           >
-            {isOwner ? 'Initialize Vault' : 'Only Owner Can Initialize'}
+            {isOwner ? "Initialize Vault" : "Only Owner Can Initialize"}
           </button>
         </div>
       )}
@@ -262,64 +265,73 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
       {/* Vault Active - Main Dashboard */}
       {vaultStatus && vaultStatus.isActive && (
         <>
-          {/* Stats Grid */}
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Heartbeat Status */}
-            <div className="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-2">
-                <Heart className="w-6 h-6 text-purple-400" />
-                <span className={`text-xs px-2 py-1 rounded ${vaultStatus.isExpired ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
-                  }`}>
-                  {vaultStatus.isExpired ? 'EXPIRED' : 'ACTIVE'}
+            <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-6 hover:border-orange-600/50 transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 bg-orange-600/20 rounded-lg">
+                  <Heart className="w-5 h-5 text-orange-600" />
+                </div>
+                <span
+                  className={`text-xs px-2 py-1 rounded font-semibold ${
+                    vaultStatus.isExpired ? "bg-red-500/20 text-red-300" : "bg-green-500/20 text-green-300"
+                  }`}
+                >
+                  {vaultStatus.isExpired ? "EXPIRED" : "ACTIVE"}
                 </span>
               </div>
-              <p className="text-2xl font-bold text-white">
-                {vaultStatus.isExpired ? '0s' : formatTimeRemaining(vaultStatus.timeUntilExpiry)}
+              <p className="text-2xl font-bold text-white font-poppins">
+                {vaultStatus.isExpired ? "0s" : formatTimeRemaining(vaultStatus.timeUntilExpiry)}
               </p>
-              <p className="text-sm text-gray-400">Until Next Heartbeat</p>
+              <p className="text-xs text-gray-400 mt-2 font-inter">Until Next Heartbeat</p>
             </div>
 
             {/* Vault Balance */}
-            <div className="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-xl p-6">
-              <DollarSign className="w-6 h-6 text-purple-400 mb-2" />
-              <p className="text-2xl font-bold text-white">
+            <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-6 hover:border-orange-600/50 transition-all">
+              <div className="p-2 bg-orange-600/20 rounded-lg w-fit mb-4">
+                <DollarSign className="w-5 h-5 text-orange-600" />
+              </div>
+              <p className="text-2xl font-bold text-white font-poppins">
                 {ethers.formatEther(vaultStatus.contractBalance)} ETH
               </p>
-              <p className="text-sm text-gray-400">Vault Balance</p>
+              <p className="text-xs text-gray-400 mt-2 font-inter">Vault Balance</p>
             </div>
 
             {/* Beneficiaries */}
-            <div className="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-xl p-6">
-              <Users className="w-6 h-6 text-purple-400 mb-2" />
-              <p className="text-2xl font-bold text-white">{beneficiaries.length}</p>
-              <p className="text-sm text-gray-400">Beneficiaries</p>
+            <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-6 hover:border-orange-600/50 transition-all">
+              <div className="p-2 bg-orange-600/20 rounded-lg w-fit mb-4">
+                <Users className="w-5 h-5 text-orange-600" />
+              </div>
+              <p className="text-2xl font-bold text-white font-poppins">{beneficiaries.length}</p>
+              <p className="text-xs text-gray-400 mt-2 font-inter">Beneficiaries</p>
             </div>
 
             {/* Heartbeat Interval */}
-            <div className="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-xl p-6">
-              <Clock className="w-6 h-6 text-purple-400 mb-2" />
-              <p className="text-2xl font-bold text-white">
+            <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-6 hover:border-orange-600/50 transition-all">
+              <div className="p-2 bg-orange-600/20 rounded-lg w-fit mb-4">
+                <Zap className="w-5 h-5 text-orange-600" />
+              </div>
+              <p className="text-2xl font-bold text-white font-poppins">
                 {Number(vaultStatus.heartbeatInterval) / 86400}d
               </p>
-              <p className="text-sm text-gray-400">Heartbeat Interval</p>
+              <p className="text-xs text-gray-400 mt-2 font-inter">Heartbeat Interval</p>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <button
               onClick={handleSendHeartbeat}
               disabled={loading || !isOwner || vaultStatus.isExpired}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg font-poppins"
             >
               <Heart className="w-5 h-5" />
-              <span>{loading ? 'Sending...' : 'Send Heartbeat'}</span>
+              <span>{loading ? "Sending..." : "Send Heartbeat"}</span>
             </button>
 
             <button
               onClick={() => setShowAddBeneficiaryModal(true)}
               disabled={loading || !isOwner}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg font-poppins"
             >
               <Users className="w-5 h-5" />
               <span>Add Beneficiary</span>
@@ -328,26 +340,31 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
             <button
               onClick={() => setShowFundModal(true)}
               disabled={loading}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg font-poppins"
             >
               <DollarSign className="w-5 h-5" />
               <span>Fund Vault</span>
             </button>
           </div>
+
           {/* Advanced Actions */}
           {vaultStatus && vaultStatus.isActive && (
-            <div className="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Advanced Actions</h3>
-              <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                <Lock className="w-5 h-5 text-cyan-400" />
+                <span>Advanced Actions</span>
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Trigger Inheritance */}
                 {vaultStatus.isExpired && (
                   <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                     <div className="flex items-start space-x-3 mb-3">
-                      <AlertCircle className="w-5 h-5 text-red-400 mt-1" />
+                      <AlertCircle className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
                       <div className="flex-1">
                         <h4 className="text-white font-semibold mb-1">Heartbeat Expired!</h4>
                         <p className="text-sm text-gray-400">
-                          The heartbeat has expired. Anyone can trigger inheritance to distribute funds to beneficiaries.
+                          The heartbeat has expired. Anyone can trigger inheritance to distribute funds to
+                          beneficiaries.
                         </p>
                       </div>
                     </div>
@@ -357,7 +374,7 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
                       className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                     >
                       <AlertCircle className="w-5 h-5" />
-                      <span>{loading ? 'Triggering...' : 'Trigger Inheritance'}</span>
+                      <span>{loading ? "Triggering..." : "Trigger Inheritance"}</span>
                     </button>
                     {totalAllocated !== 100 && (
                       <p className="text-xs text-red-400 mt-2 text-center">
@@ -381,9 +398,7 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
                           >
                             Deactivate Vault
                           </button>
-                          <p className="text-xs text-gray-500 text-center">
-                            Deactivating allows you to withdraw funds
-                          </p>
+                          <p className="text-xs text-gray-500 text-center">Deactivating allows you to withdraw funds</p>
                         </>
                       ) : (
                         <>
@@ -408,27 +423,30 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
 
           {/* Beneficiaries List */}
           {beneficiaries.length > 0 && (
-            <div className="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-xl p-6">
+            <div className="bg-gray-900/50 backdrop-blur border border-gray-800 rounded-xl p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-white">Beneficiaries</h3>
-                <span className="text-sm text-gray-400">
+                <h3 className="text-xl font-semibold text-white font-poppins">Beneficiaries</h3>
+                <span className="text-sm text-gray-400 bg-gray-900/50 px-3 py-1 rounded-full font-inter">
                   Allocated: {totalAllocated.toFixed(1)}%
                 </span>
               </div>
               <div className="space-y-3">
                 {beneficiaries.map((b, idx) => (
-                  <div key={idx} className="flex justify-between items-center bg-slate-900/50 p-4 rounded-lg hover:bg-slate-900/70 transition-all">
+                  <div
+                    key={idx}
+                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-900/50 p-4 rounded-lg hover:bg-gray-900/70 transition-all border border-gray-700/30 gap-4"
+                  >
                     <div className="flex-1">
                       <p className="text-white font-mono text-sm mb-1">
                         {b.beneficiaryAddress.slice(0, 6)}...{b.beneficiaryAddress.slice(-4)}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-400 font-inter">
                         Share: {(Number(b.sharePercentage) / 100).toFixed(1)}%
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 w-full sm:w-auto">
                       <div className="text-right mr-4">
-                        <p className="text-purple-400 font-semibold text-lg">
+                        <p className="text-orange-600 font-semibold text-lg font-poppins">
                           {(Number(b.sharePercentage) / 100).toFixed(1)}%
                         </p>
                       </div>
@@ -436,12 +454,12 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
                         <>
                           <button
                             onClick={() => {
-                              setSelectedBeneficiary(b.beneficiaryAddress);
-                              setNewSharePercentage((Number(b.sharePercentage) / 100).toString());
-                              setShowUpdateBeneficiaryModal(true);
+                              setSelectedBeneficiary(b.beneficiaryAddress)
+                              setNewSharePercentage((Number(b.sharePercentage) / 100).toString())
+                              setShowUpdateBeneficiaryModal(true)
                             }}
                             disabled={loading}
-                            className="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 border border-blue-500/30"
+                            className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 border border-gray-600"
                           >
                             Edit
                           </button>
@@ -459,23 +477,25 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
                 ))}
               </div>
             </div>
-          )}{/* Transaction History */}
+          )}
+
+          {/* Transaction History */}
           <TransactionHistory />
         </>
       )}
 
       {/* Initialize Vault Modal */}
       {showInitModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 border border-purple-500/30 rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">Initialize Vault</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4 font-poppins">Initialize Vault</h3>
             <div className="mb-4">
-              <label className="block text-sm text-gray-400 mb-2">Heartbeat Interval (days)</label>
+              <label className="block text-sm text-gray-400 mb-2 font-inter">Heartbeat Interval (days)</label>
               <input
                 type="number"
                 value={heartbeatDays}
                 onChange={(e) => setHeartbeatDays(e.target.value)}
-                className="w-full bg-slate-900 border border-purple-500/30 rounded-lg px-4 py-2 text-white"
+                className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-orange-600 focus:outline-none transition-all font-inter"
                 min="1"
                 max="365"
               />
@@ -484,13 +504,13 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
               <button
                 onClick={handleInitializeVault}
                 disabled={loading}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50"
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 font-poppins"
               >
-                {loading ? 'Initializing...' : 'Initialize'}
+                {loading ? "Initializing..." : "Initialize"}
               </button>
               <button
                 onClick={() => setShowInitModal(false)}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition-all font-poppins"
               >
                 Cancel
               </button>
@@ -501,34 +521,34 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
 
       {/* Add Beneficiary Modal */}
       {showAddBeneficiaryModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 border border-purple-500/30 rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">Add Beneficiary</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4 font-poppins">Add Beneficiary</h3>
             <div className="space-y-4 mb-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Beneficiary Address</label>
+                <label className="block text-sm text-gray-400 mb-2 font-inter">Beneficiary Address</label>
                 <input
                   type="text"
                   value={beneficiaryAddress}
                   onChange={(e) => setBeneficiaryAddress(e.target.value)}
                   placeholder="0x..."
-                  className="w-full bg-slate-900 border border-purple-500/30 rounded-lg px-4 py-2 text-white font-mono text-sm"
+                  className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white font-mono text-sm focus:border-orange-600 focus:outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Share Percentage (%)</label>
+                <label className="block text-sm text-gray-400 mb-2 font-inter">Share Percentage (%)</label>
                 <input
                   type="number"
                   value={beneficiaryShare}
                   onChange={(e) => setBeneficiaryShare(e.target.value)}
                   placeholder="e.g., 50 for 50%"
-                  className="w-full bg-slate-900 border border-purple-500/30 rounded-lg px-4 py-2 text-white"
+                  className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-orange-600 focus:outline-none transition-all font-inter"
                   min="0"
                   max="100"
                   step="0.1"
                 />
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 bg-gray-900/50 p-2 rounded font-inter">
                 Currently allocated: {totalAllocated.toFixed(1)}%. Total must equal 100%.
               </p>
             </div>
@@ -536,13 +556,13 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
               <button
                 onClick={handleAddBeneficiary}
                 disabled={loading}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50"
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 font-poppins"
               >
-                {loading ? 'Adding...' : 'Add'}
+                {loading ? "Adding..." : "Add"}
               </button>
               <button
                 onClick={() => setShowAddBeneficiaryModal(false)}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition-all font-poppins"
               >
                 Cancel
               </button>
@@ -553,33 +573,33 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
 
       {/* Update Beneficiary Modal */}
       {showUpdateBeneficiaryModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 border border-purple-500/30 rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">Update Beneficiary Share</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4 font-poppins">Update Beneficiary Share</h3>
             <div className="space-y-4 mb-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Beneficiary Address</label>
+                <label className="block text-sm text-gray-400 mb-2 font-inter">Beneficiary Address</label>
                 <input
                   type="text"
                   value={selectedBeneficiary}
                   disabled
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-gray-500 font-mono text-sm cursor-not-allowed"
+                  className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-gray-500 font-mono text-sm cursor-not-allowed"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">New Share Percentage (%)</label>
+                <label className="block text-sm text-gray-400 mb-2 font-inter">New Share Percentage (%)</label>
                 <input
                   type="number"
                   value={newSharePercentage}
                   onChange={(e) => setNewSharePercentage(e.target.value)}
                   placeholder="e.g., 50 for 50%"
-                  className="w-full bg-slate-900 border border-purple-500/30 rounded-lg px-4 py-2 text-white"
+                  className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-orange-600 focus:outline-none transition-all font-inter"
                   min="0"
                   max="100"
                   step="0.1"
                 />
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 bg-gray-900/50 p-2 rounded font-inter">
                 Currently allocated: {totalAllocated.toFixed(1)}%. Total must equal 100%.
               </p>
             </div>
@@ -587,17 +607,17 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
               <button
                 onClick={handleUpdateBeneficiary}
                 disabled={loading}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50"
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 font-poppins"
               >
-                {loading ? 'Updating...' : 'Update'}
+                {loading ? "Updating..." : "Update"}
               </button>
               <button
                 onClick={() => {
-                  setShowUpdateBeneficiaryModal(false);
-                  setSelectedBeneficiary('');
-                  setNewSharePercentage('');
+                  setShowUpdateBeneficiaryModal(false)
+                  setSelectedBeneficiary("")
+                  setNewSharePercentage("")
                 }}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition-all font-poppins"
               >
                 Cancel
               </button>
@@ -608,30 +628,30 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
 
       {/* Fund Vault Modal */}
       {showFundModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 border border-purple-500/30 rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">Fund Vault</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4 font-poppins">Fund Vault</h3>
             <div className="mb-4">
-              <label className="block text-sm text-gray-400 mb-2">Amount (ETH)</label>
+              <label className="block text-sm text-gray-400 mb-2 font-inter">Amount (ETH)</label>
               <input
                 type="text"
                 value={fundAmount}
                 onChange={(e) => setFundAmount(e.target.value)}
                 placeholder="0.1"
-                className="w-full bg-slate-900 border border-purple-500/30 rounded-lg px-4 py-2 text-white"
+                className="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-orange-600 focus:outline-none transition-all font-inter"
               />
             </div>
             <div className="flex space-x-3">
               <button
                 onClick={handleFundVault}
                 disabled={loading}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50"
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 font-poppins"
               >
-                {loading ? 'Sending...' : 'Fund'}
+                {loading ? "Sending..." : "Fund"}
               </button>
               <button
                 onClick={() => setShowFundModal(false)}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition-all font-poppins"
               >
                 Cancel
               </button>
@@ -640,5 +660,5 @@ export const Dashboard = ({ provider, signer, account }: DashboardProps) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
