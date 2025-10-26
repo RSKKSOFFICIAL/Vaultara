@@ -7,7 +7,7 @@
 [![Hardhat](https://img.shields.io/badge/Hardhat-3.0.7-yellow)](https://hardhat.org/)
 [![React](https://img.shields.io/badge/React-19.1.1-blue)](https://reactjs.org/)
 
-[ Demo Video](#) | [ Live Demo](https://v0.app/chat/greeting-qJIU2xDcLwO?b=v0-preview-b_Znw7T7vfEta&path=%2F&f=1) | [ Smart Contract](https://eth-sepolia.blockscout.com/address/0xC11949532F5C46d567D254dCcFAd4BDC87f1306A)
+[ Demo Video](./Support/Vaultara.mp4) | [ Live Demo](https://v0.app/chat/greeting-qJIU2xDcLwO?b=v0-preview-b_Znw7T7vfEta&path=%2F&f=1) | [ Smart Contract](https://eth-sepolia.blockscout.com/address/0xC11949532F5C46d567D254dCcFAd4BDC87f1306A)
 
 ---
 
@@ -146,16 +146,16 @@ React + TypeScript
 
 ##  Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Smart Contracts** | Solidity 0.8.20 | Core inheritance logic |
-| **Testing** | Hardhat + Mocha | 48 comprehensive tests |
-| **Frontend** | React + TypeScript | User interface |
-| **Styling** | Tailwind CSS | Modern, responsive design |
-| **Web3** | Ethers.js v6 | Blockchain interaction |
-| **Encryption** | Lit Protocol | Beneficiary privacy |
-| **Verification** | Blockscout | Transaction transparency |
-| **Security** | OpenZeppelin | Audited contract libraries |
+| Layer               | Technology         | Purpose                    |
+| ------------------- | ------------------ | -------------------------- |
+| **Smart Contracts** | Solidity 0.8.20    | Core inheritance logic     |
+| **Testing**         | Hardhat + Mocha    | 48 comprehensive tests     |
+| **Frontend**        | React + TypeScript | User interface             |
+| **Styling**         | Tailwind CSS       | Modern, responsive design  |
+| **Web3**            | Ethers.js v6       | Blockchain interaction     |
+| **Encryption**      | Lit Protocol       | Beneficiary privacy        |
+| **Verification**    | Blockscout         | Transaction transparency   |
+| **Security**        | OpenZeppelin       | Audited contract libraries |
 
 ---
 
@@ -488,7 +488,7 @@ This is open-source software. Feel free to:
 ##  Contact & Links
 
 - **GitHub**: [Repository Link](https://github.com/RSKKSOFFICIAL/Vaultara)
-- **Demo Video**: [YouTube Link]
+- **Demo Video**: [Repository Link](./Support/Vaultara.mp4)
 - **Live Demo**: [Vercel Deployment](https://v0.app/chat/greeting-qJIU2xDcLwO?b=v0-preview-b_Znw7T7vfEta&path=%2F&f=1)
 
 ---
